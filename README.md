@@ -6,4 +6,4 @@
     using Jupyter2Pluto
     convert_notebook("sample.ipynb")
 ```
-Pluto notebook `sample.ipynb.jl` will be created in the directory where jupyter file is located
+Pluto notebook `sample.ipynb.jl` will be created in the directory where notebook `sample.ipynb` file is located
