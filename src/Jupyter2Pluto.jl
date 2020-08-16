@@ -216,10 +216,6 @@ function JupyterCell(pcell::PlutoMarkdownCell)
     JupyterMarkdownCell(pcell.content)
 end
 
-function generate_jupyter(pcells::Vector{JupyterCell})
-    return Dict()
-end
-
 function convert2jupyter(file)
     # parser: pluto notebook has orderidlist, map(order_id => codesnippets) ::Plutocells
     plutoraw = readchomp(file)
