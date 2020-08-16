@@ -13,6 +13,7 @@ export convert2jupyter, convert2pluto
 abstract type JupyterCell end
 
 struct JupyterCodeCell <: JupyterCell
+    execution_count::Int
     content::Vector{String}
 end
 struct JupyterMarkdownCell <: JupyterCell
@@ -73,11 +74,11 @@ end
 function Base.Dict(cell::JupyterCodeCell)
     Dict(
         "cell_type" => "code",
+        "execution_count" => cell.execution_count,
         "metadata"=>Dict(),
-        "outputs"=>[],
-        "source"=>
-            cell.content.*"\n"
-
+            "outputs"=>[],
+            "source"=>
+                cell.content.*"\n"
     )
 end
 
@@ -147,7 +148,7 @@ function convert2pluto(jupyter_file)
             push!(pluto_cells, pc)
         end
         if cell["cell_type"] == "code" && !isempty(cell["source"])
-            pc = PlutoCell(JupyterCodeCell(cell["source"]))
+            pc = PlutoCell(JupyterCodeCell(1,cell["source"]))
             push!(pluto_cells, pc)
         end
     end
@@ -159,9 +160,6 @@ function convert2pluto(jupyter_file)
     dest
 end
 
-function parse_pluto_load(raw::AbstractString)
-    JupyterCodeCell(split(raw, "\n"))
-end
 
 function parse_pluto_cell(rawcell::String)
     cellist = string.(split(rawcell, '\n'))
@@ -197,8 +195,20 @@ function order(pcells::Vector{PlutoCell}, orderids::Vector{String})
     return sorted_pcells
 end
 
-function JupyterCell(pcell::PlutoCodeCell)
-    JupyterCodeCell(split(pcell.content, "\n"))
+let
+    global JupyterCell
+    global parse_pluto_load
+    execution_count = 1
+    function parse_pluto_load(raw::AbstractString)
+        jcell = JupyterCodeCell(execution_count, split(raw, "\n"))
+        execution_count += 1
+        jcell
+    end
+    function JupyterCell(pcell::PlutoCodeCell)
+        jcell = JupyterCodeCell(execution_count,split(pcell.content, "\n"))
+        execution_count += 1
+        jcell
+    end
 end
 
 function JupyterCell(pcell::PlutoMarkdownCell)
