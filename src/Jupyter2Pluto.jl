@@ -8,7 +8,7 @@ const _order_delimiter = "# ╠═"
 const _order_delimiter_folded = "# ╟─"
 const _cell_suffix = "\n\n"
 
-export convert_notebook
+export convert2jupyter, convert2pluto
 
 abstract type JupyterCell end
 
@@ -59,6 +59,26 @@ md\"
 $(content)
 \"$(_cell_suffix)"""
     print(io, r)
+end
+
+function Base.Dict(cell::JupyterMarkdownCell)
+    Dict(
+        "cell_type" => "markdown",
+        "metadata"=>Dict(),
+        "source"=>
+            split(cell.content, '\n').*"\n"
+    )
+end
+
+function Base.Dict(cell::JupyterCodeCell)
+    Dict(
+        "cell_type" => "code",
+        "metadata"=>Dict(),
+        "outputs"=>[],
+        "source"=>
+            cell.content.*"\n"
+
+    )
 end
 
 function cell_id()
@@ -112,7 +132,7 @@ function has_multiple_expressions(codecell::JupyterCodeCell)
     length(expressions) > 1
 end
 
-function convert_file(jupyter_file)
+function convert2pluto(jupyter_file)
     jupyter_cells = try
         content = JSON.parsefile(jupyter_file)
         content["cells"]
@@ -139,7 +159,94 @@ function convert_file(jupyter_file)
     dest
 end
 
-function convert_notebook(file)
-    convert_file(file)
+function parse_pluto_load(raw::AbstractString)
+    JupyterCodeCell(split(raw, "\n"))
+end
+
+function parse_pluto_cell(rawcell::String)
+    cellist = string.(split(rawcell, '\n'))
+    body = join(cellist[2:end], '\n')
+    mdr=r"md\"(.*)\""s
+    matches = match(mdr, body)
+    if matches != nothing
+        PlutoMarkdownCell(UUID(cellist[1]), matches.captures[1])
+    else
+        PlutoCodeCell(UUID(cellist[1]), body)
+    end
+end
+
+function parse_pluto_end(rawcell::String)
+    main_split= string.(split(rawcell, _order_delimiter))
+    orderids = String[]
+    for order in main_split
+        splits = string.(split(order, _order_delimiter_folded))
+        for split in splits
+            !isempty(split) && push!(orderids, strip(split))
+        end
+    end
+    orderids
+end
+
+function order(pcells::Vector{PlutoCell}, orderids::Vector{String})
+    sorted_pcells = PlutoCell[]
+    for orderid in orderids
+        for pcell in pcells
+            occursin(string(pcell.cell_id),  orderid) && push!(sorted_pcells, pcell)
+        end
+    end
+    return sorted_pcells
+end
+
+function JupyterCell(pcell::PlutoCodeCell)
+    JupyterCodeCell(split(pcell.content, "\n"))
+end
+
+function JupyterCell(pcell::PlutoMarkdownCell)
+    content = pcell.content
+    JupyterMarkdownCell(pcell.content)
+end
+
+function generate_jupyter(pcells::Vector{JupyterCell})
+    return Dict()
+end
+
+function convert2jupyter(file)
+    # parser: pluto notebook has orderidlist, map(order_id => codesnippets) ::Plutocells
+    plutoraw = readchomp("Interactivity.jl")
+    plutocelllist = string.(split(plutoraw, _cell_id_delimiter))
+    jupyterloadcell = parse_pluto_load(plutocelllist[1])
+    i=2
+    pcells = PlutoCell[]
+    while(i <= length(plutocelllist)-1)
+        pcell = parse_pluto_cell(plutocelllist[i])
+        push!(pcells, pcell)
+        i+=1
+    end
+    plutoend = parse_pluto_end(plutocelllist[end])
+    ordered_pcells = order(pcells, plutoend)
+    jcells = map( pcell -> JupyterCell(pcell), pcells)
+    all_main_cells = Dict.(jcells)
+    pushfirst!(all_main_cells, Dict(jupyterloadcell))
+    d_cells = Dict()
+    d_cells["cells"] = all_main_cells
+    d_cells["metadata"] = Dict(
+        "kernelspec"=> Dict(
+            "display_name"=> "Julia 1.4.0",
+            "language"=> "julia",
+            "name"=> "julia-1.4"
+        ),
+        "language_info"=> Dict(
+            "file_extension"=> ".jl",
+            "mimetype"=> "application/julia",
+            "name"=> "julia",
+            "version"=> "1.4.0"
+        )
+    )
+    d_cells["nbformat"]= 4
+    d_cells["nbformat_minor"]= 2
+
+    open(file*".ipynb", "w") do f
+        JSON.print(f, d_cells , 4)
+    end
 end
 end # module
