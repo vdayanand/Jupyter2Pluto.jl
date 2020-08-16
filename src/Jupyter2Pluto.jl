@@ -212,7 +212,7 @@ end
 
 function convert2jupyter(file)
     # parser: pluto notebook has orderidlist, map(order_id => codesnippets) ::Plutocells
-    plutoraw = readchomp("Interactivity.jl")
+    plutoraw = readchomp(file)
     plutocelllist = string.(split(plutoraw, _cell_id_delimiter))
     jupyterloadcell = parse_pluto_load(plutocelllist[1])
     i=2
@@ -231,15 +231,15 @@ function convert2jupyter(file)
     d_cells["cells"] = all_main_cells
     d_cells["metadata"] = Dict(
         "kernelspec"=> Dict(
-            "display_name"=> "Julia 1.4.0",
+            "display_name"=> "Julia $(VERSION)",
             "language"=> "julia",
-            "name"=> "julia-1.4"
+            "name"=> "julia-$(VERSION.major).$(VERSION.minor)"
         ),
         "language_info"=> Dict(
             "file_extension"=> ".jl",
             "mimetype"=> "application/julia",
             "name"=> "julia",
-            "version"=> "1.4.0"
+            "version"=> VERSION
         )
     )
     d_cells["nbformat"]= 4
