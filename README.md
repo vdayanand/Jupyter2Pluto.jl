@@ -4,7 +4,7 @@
 ``` julia
     ] add http://github.com/vdayanand/Jupyter2Pluto.jl
     using Jupyter2Pluto
-    convert2pluto("sample.ipynb")
+    jupyter2pluto("sample.ipynb")
 ```
 Pluto notebook `sample.ipynb.jl` will be created in the working directory
 
@@ -13,6 +13,6 @@ Pluto notebook `sample.ipynb.jl` will be created in the working directory
 ``` julia
     ] add http://github.com/vdayanand/Jupyter2Pluto.jl
     using Jupyter2Pluto
-    convert2jupyter("sample.jl")
+    pluto2jupyter("sample.jl")
 ```
 Jupyter notebook `sample.jl.ipynb` will be created in the working directory

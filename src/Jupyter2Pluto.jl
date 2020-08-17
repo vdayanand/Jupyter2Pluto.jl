@@ -8,7 +8,7 @@ const _order_delimiter = "# ╠═"
 const _order_delimiter_folded = "# ╟─"
 const _cell_suffix = "\n\n"
 
-export convert2jupyter, convert2pluto
+export pluto2jupyter, jupyter2pluto
 
 abstract type JupyterCell end
 
@@ -133,7 +133,7 @@ function has_multiple_expressions(codecell::JupyterCodeCell)
     length(expressions) > 1
 end
 
-function convert2pluto(jupyter_file)
+function jupyter2pluto(jupyter_file)
     jupyter_cells = try
         content = JSON.parsefile(jupyter_file)
         content["cells"]
@@ -216,7 +216,7 @@ function JupyterCell(pcell::PlutoMarkdownCell)
     JupyterMarkdownCell(pcell.content)
 end
 
-function convert2jupyter(file)
+function pluto2jupyter(file)
     # parser: pluto notebook has orderidlist, map(order_id => codesnippets) ::Plutocells
     plutoraw = readchomp(file)
     plutocelllist = string.(split(plutoraw, _cell_id_delimiter))
