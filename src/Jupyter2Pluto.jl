@@ -13,7 +13,7 @@ export pluto2jupyter, jupyter2pluto
 abstract type JupyterCell end
 
 struct JupyterCodeCell <: JupyterCell
-    execution_count::Int
+    execution_count::Union{Int, Nothing}
     content::Vector{String}
 end
 struct JupyterMarkdownCell <: JupyterCell
@@ -157,7 +157,7 @@ function jupyter2pluto(jupyter_file)
             push!(pluto_cells, pc)
         end
         if cell["cell_type"] == "code" && !isempty(cell["source"])
-            jcode_cellJupyterCodeCell(cell["execution_count"],cell["source"])
+            jcode_cell = JupyterCodeCell(cell["execution_count"],cell["source"])
             pc = PlutoCell(jcode_cell)
             push!(pluto_cells, pc)
         end
@@ -267,9 +267,11 @@ function pluto2jupyter(file)
     )
     d_cells["nbformat"]= 4
     d_cells["nbformat_minor"]= 2
-
-    open(file*".ipynb", "w") do f
+    dest = file*".ipynb"
+    open(dest, "w") do f
         JSON.print(f, d_cells , 4)
     end
+    dest
+
 end
 end # module
