@@ -1,6 +1,2 @@
-using Jupyter2Pluto
-using Test
-
-@testset "Jupyter2Pluto.jl" begin
-    # Write your tests here.
-end
+include("test_pluto2jupyter.jl")
+include("test_jupyter2pluto.jl")
