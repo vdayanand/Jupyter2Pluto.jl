@@ -78,7 +78,7 @@ function Base.Dict(cell::JupyterCodeCell)
         "metadata"=>Dict(),
             "outputs"=>[],
             "source"=>
-                cell.content.*"\n"
+                [isempty(content) ? content : (content * "\n") for content in cell.content]
     )
 end
 

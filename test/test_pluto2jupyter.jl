@@ -13,6 +13,9 @@ const line_markdown_wrap = "md\"$line_markdown\""
 const multiline_markdown_wrap = """md\"\"\"$multi_markdown\"\"\"
 """
 
+const code_line = """
+area(d) = pi * (d / 2)^2
+"""
 function test_pluto_parser()
     multiline_markdown_str = "2ed4bb92-d45c-11ea-0b31-2d8e32ce7b44\n$multiline_markdown_wrap"
     line_markdown_str = "03664f5c-d45c-11ea-21b6-91cd647a07aa\n$line_markdown_wrap"
@@ -28,11 +31,11 @@ function test_pluto_parser()
         @test pmark_multiline_cell.content == multi_markdown
     end
     pcode_cell = Jupyter2Pluto.parse_pluto_cell("""14158eb0-d45c-11ea-088f-330e45412320
-area(d) = pi * (d / 2)^2""")
+$code_line""")
 
     @testset "parse pluto code cell" begin
         @test pcode_cell.cell_id == Base.UUID("14158eb0-d45c-11ea-088f-330e45412320")
-        @test pcode_cell.content == "area(d) = pi * (d / 2)^2"
+        @test pcode_cell.content == code_line
     end
     orders = Jupyter2Pluto.parse_pluto_end("""Cell order:
 # ╟─03664f5c-d45c-11ea-21b6-91cd647a07aa
@@ -54,7 +57,7 @@ area(d) = pi * (d / 2)^2""")
     @testset "Pluto to jupyter conversion"  begin
         @test jmark_line_cell.content == line_markdown
         @test jmark_multiline_cell.content == multi_markdown
-        @test jcodecell.content == ["area(d) = pi * (d / 2)^2"]
+        @test jcodecell.content == split(code_line, "\n")
         @test jcodecell.execution_count != 0
     end
     @testset "Jupyter to dict"  begin
@@ -72,7 +75,18 @@ area(d) = pi * (d / 2)^2""")
         @test jcode_dict["cell_type"] == "code"
         @test isempty(jcode_dict["metadata"])
         @test jcode_dict["execution_count"] != 0
-        @test jcode_dict["source"] == ["""area(d) = pi * (d / 2)^2\n"""]
+        code_lines = string.(split(code_line, "\n"))
+        for (index, line) in enumerate(jcode_dict["source"])
+            @info line
+            if (line == "\n")
+                @test false
+            end
+            if !isempty(line)
+                @test code_lines[index]*"\n" == line
+            else
+                @test code_lines[index] == line
+            end
+        end
     end
 end
 
