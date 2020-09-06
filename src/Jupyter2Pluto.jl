@@ -160,12 +160,17 @@ function jupyter2pluto(jupyter_file)
     dest
 end
 
-
 function parse_pluto_cell(rawcell::String)
     cellist = string.(split(rawcell, '\n'))
     body = join(cellist[2:end], '\n')
-    mdr=r"md\"(.*)\""s
-    matches = match(mdr, body)
+    multiline_mdr = r"md\"\"\"(.*)\"\"\""s
+    line_mdr = r"md\"(.*)\""s
+    matches = if (mat = match(multiline_mdr, body)) != nothing
+        mat
+    else
+        match(line_mdr, body)
+    end
+
     if matches != nothing
         PlutoMarkdownCell(UUID(cellist[1]), matches.captures[1])
     else
@@ -182,14 +187,16 @@ function parse_pluto_end(rawcell::String)
             !isempty(split) && push!(orderids, strip(split))
         end
     end
-    orderids
+    orderids[2:end]
 end
 
 function order(pcells::Vector{PlutoCell}, orderids::Vector{String})
     sorted_pcells = PlutoCell[]
     for orderid in orderids
         for pcell in pcells
-            occursin(string(pcell.cell_id),  orderid) && push!(sorted_pcells, pcell)
+            if occursin(string(pcell.cell_id),  orderid)
+                push!(sorted_pcells, pcell)
+            end
         end
     end
     return sorted_pcells
@@ -230,7 +237,7 @@ function pluto2jupyter(file)
     end
     plutoend = parse_pluto_end(plutocelllist[end])
     ordered_pcells = order(pcells, plutoend)
-    jcells = map( pcell -> JupyterCell(pcell), pcells)
+    jcells = map( pcell -> JupyterCell(pcell), ordered_pcells)
     all_main_cells = Dict.(jcells)
     pushfirst!(all_main_cells, Dict(jupyterloadcell))
     d_cells = Dict()
@@ -245,7 +252,7 @@ function pluto2jupyter(file)
             "file_extension"=> ".jl",
             "mimetype"=> "application/julia",
             "name"=> "julia",
-            "version"=> VERSION
+            "version"=> string(VERSION)
         )
     )
     d_cells["nbformat"]= 4
