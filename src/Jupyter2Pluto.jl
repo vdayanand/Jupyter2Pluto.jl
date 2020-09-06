@@ -56,29 +56,37 @@ function Base.show(io::IO, cell::PlutoMarkdownCell)
     content = replace(cell.content, "\"" => "\\\"")
     r = """
 $(_cell_id_delimiter)$(cell.cell_id)
-md\"
-$(content)
-\"$(_cell_suffix)"""
+md\"\"\"
+$(content)\"\"\"$(_cell_suffix)"""
     print(io, r)
 end
 
 function Base.Dict(cell::JupyterMarkdownCell)
+    source = String[]
+    content_list = split(cell.content, "\n")
+    for (i, content) in enumerate(content_list)
+        i == length(cell.content) && (push!(source, content); continue)
+        push!(source, content*"\n")
+    end
     Dict(
         "cell_type" => "markdown",
         "metadata"=>Dict(),
-        "source"=>
-            split(cell.content, '\n').*"\n"
+        "source"=> source
     )
 end
 
 function Base.Dict(cell::JupyterCodeCell)
+    source = String[]
+    for (i, content) in enumerate(cell.content)
+        (isempty(content) || i == length(cell.content)) && (push!(source, content); continue)
+        push!(source, content*"\n")
+    end
     Dict(
         "cell_type" => "code",
         "execution_count" => cell.execution_count,
         "metadata"=>Dict(),
             "outputs"=>[],
-            "source"=>
-                [isempty(content) ? content : (content * "\n") for content in cell.content]
+            "source"=> source
     )
 end
 
@@ -117,7 +125,7 @@ end
 function PlutoCell(codecell::JupyterCodeCell)
     id = cell_id()
     if has_multiple_expressions(codecell)
-        return PlutoBlockCodeCell(id, join(codecell.content))
+        return PlutoBlockCodeCell(id, join("    ".*codecell.content))
     end
     return PlutoCodeCell(id, join(codecell.content))
 end
@@ -144,11 +152,13 @@ function jupyter2pluto(jupyter_file)
     for cell in jupyter_cells
         !haskey(cell, "cell_type") || !haskey(cell,"source") && continue
         if cell["cell_type"] == "markdown" && !isempty(cell["source"])
-            pc = PlutoCell(JupyterMarkdownCell(join(cell["source"])))
+            jmark_cell = JupyterMarkdownCell(join(cell["source"]))
+            pc = PlutoCell(jmark_cell)
             push!(pluto_cells, pc)
         end
         if cell["cell_type"] == "code" && !isempty(cell["source"])
-            pc = PlutoCell(JupyterCodeCell(1,cell["source"]))
+            jcode_cellJupyterCodeCell(cell["execution_count"],cell["source"])
+            pc = PlutoCell(jcode_cell)
             push!(pluto_cells, pc)
         end
     end
