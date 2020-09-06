@@ -1,2 +1,2 @@
-include("pluto2jupyter.jl")
-include("jupyter2pluto.jl")
+include("test_pluto2jupyter.jl")
+include("test_jupyter2pluto.jl")

@@ -77,7 +77,6 @@ $code_line""")
         @test jcode_dict["execution_count"] != 0
         code_lines = string.(split(code_line, "\n"))
         for (index, line) in enumerate(jcode_dict["source"])
-            @info line
             if (line == "\n")
                 @test false
             end
