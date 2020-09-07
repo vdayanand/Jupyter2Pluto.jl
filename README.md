@@ -1,6 +1,6 @@
 # Jupyter2Pluto
-## convert Jupyter notebook into [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook
-### Quickstart
+### convert Jupyter notebook into [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook
+
 ``` julia
     ] add http://github.com/vdayanand/Jupyter2Pluto.jl
     using Jupyter2Pluto
@@ -8,11 +8,8 @@
 ```
 Pluto notebook `sample.ipynb.jl` will be created in the working directory
 
-## convert [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook into Jupyter notebook
-### Quickstart
+### convert [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook into Jupyter notebook
 ``` julia
-    ] add http://github.com/vdayanand/Jupyter2Pluto.jl
-    using Jupyter2Pluto
     pluto2jupyter("sample.jl")
 ```
 Jupyter notebook `sample.jl.ipynb` will be created in the working directory
