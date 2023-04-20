@@ -163,7 +163,8 @@ function jupyter2pluto(jupyter_file)
         end
     end
     output = generate_code(pluto_cells)
-    dest = "$(jupyter_file).jl"
+    fileName = getFileName(jupyter_file)
+    dest = "$(fileName).jl"
     open(dest, "w") do f
         write(f, output)
     end
@@ -267,11 +268,22 @@ function pluto2jupyter(file)
     )
     d_cells["nbformat"]= 4
     d_cells["nbformat_minor"]= 2
-    dest = file*".ipynb"
+    fileName = getFileName(file)
+    dest = fileName*".ipynb"
     open(dest, "w") do f
         JSON.print(f, d_cells , 4)
     end
     dest
 
 end
+
+function getFileName(str::AbstractString)
+    parts = split(str, ".")
+    if length(parts) == 1
+        return str
+    else
+        return join(parts[1:end-1], ".")
+    end
+end
+
 end # module
