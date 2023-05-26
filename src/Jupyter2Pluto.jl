@@ -136,7 +136,16 @@ function PlutoCell(codecell::JupyterMarkdownCell)
 end
 
 function has_multiple_expressions(codecell::JupyterCodeCell)
-    expressions = Meta.parse("begin "*join(codecell.content, "\n")*" end").args
+    cellcontent = join(codecell.content, "\n")
+    replmodechars = r"\W*[\?|\]|;]"
+    startswith(cellcontent, replmodechars) && return false
+    expressions = try
+        codewithbegin = "begin "*cellcontent*" end"
+        Meta.parse(codewithbegin).args
+    catch ex
+        @warn "Failed to parse expression $(codewithbegin)"
+        return false
+    end
     filter!(x -> !(x isa LineNumberNode), expressions)
     length(expressions) > 1
 end
