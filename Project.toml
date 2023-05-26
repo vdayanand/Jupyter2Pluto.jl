@@ -1,7 +1,7 @@
 name = "Jupyter2Pluto"
 uuid = "2f5d96fc-2846-4962-ac8e-40dd2dbd1736"
 authors = ["vdayanand <venkatesh@juliacomputing.com> and contributors"]
-version = "0.1.1"
+version = "0.2.0"
 
 [deps]
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
