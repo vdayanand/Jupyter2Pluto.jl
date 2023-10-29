@@ -3,7 +3,8 @@
 ### convert Jupyter notebook into [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook
 
 ``` julia
-    ] add http://github.com/vdayanand/Jupyter2Pluto.jl
+    using Pkg
+    Pkg.add("Jupyter2Pluto")
     using Jupyter2Pluto
     jupyter2pluto("sample.ipynb")
 ```
