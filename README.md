@@ -29,5 +29,6 @@ If you have a Pluto notebook and want to convert it to a Jupyter notebook, simpl
 ```julia
 pluto2jupyter("sample.jl")
 ```
+This command will create a new Jupyter notebook named `sample.ipynb` in your current working directory.
 ## Contributions
  If you'd like to improve the package, fix issues, or add new features, please consider contributing to the project. 
