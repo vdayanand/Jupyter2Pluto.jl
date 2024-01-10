@@ -153,9 +153,12 @@ end
 function jupyter2pluto(jupyter_file)
     jupyter_cells = try
         content = JSON.parsefile(jupyter_file)
+        if !isJupyterNotebook(content)
+          error("File is not Jupyter Notebook")
+        end
         content["cells"]
     catch ex
-        error("Jupyter notebook parse error")
+        error("Jupyter notebook parse error: ", ex)
     end
     pluto_cells = PlutoCell[]
     for cell in jupyter_cells
@@ -293,6 +296,14 @@ function getFileName(str::AbstractString)
     else
         return join(parts[1:end-1], ".")
     end
+end
+
+function isJupyterNotebook(content)
+  try
+    return haskey(content, "cells") && haskey(content, "metadata")
+  catch e
+    return false
+  end
 end
 
 end # module
