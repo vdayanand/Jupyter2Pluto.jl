@@ -152,7 +152,8 @@ end
 
 function jupyter2pluto(jupyter_file)
     jupyter_cells = try
-        if !isJupyterNotebook(jupyter_file)
+        content = JSON.parsefile(jupyter_file)
+        if !isJupyterNotebook(content)
           error("File is not Jupyter Notebook")
         end
         content["cells"]
@@ -297,9 +298,8 @@ function getFileName(str::AbstractString)
     end
 end
 
-function isJupyterNotebook(jupyter_file)
+function isJupyterNotebook(content)
   try
-    content = JSON.parsefile(jupyter_file)
     return haskey(content, "cells") && haskey(content, "metadata")
   catch e
     return false
