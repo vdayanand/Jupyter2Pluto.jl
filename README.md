@@ -1,16 +1,34 @@
 
 # Jupyter2Pluto
-### convert Jupyter notebook into [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook
 
-``` julia
-    ] add http://github.com/vdayanand/Jupyter2Pluto.jl
-    using Jupyter2Pluto
-    jupyter2pluto("sample.ipynb")
-```
-Pluto notebook `sample.jl` will be created in the working directory
+Jupyter2Pluto is a Julia package that allows you to convert Jupyter notebooks into [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebooks and vice versa. 
+## Installation
 
-### convert [Pluto.jl](https://github.com/fonsp/Pluto.jl) notebook into Jupyter notebook
-``` julia
-    pluto2jupyter("sample.jl")
+You can install Jupyter2Pluto using the Julia package manager. Open a Julia REPL and run the following commands:
+
+```julia
+using Pkg
+Pkg.add("Jupyter2Pluto")
 ```
-Jupyter notebook `sample.ipynb` will be created in the working directory
+
+## Converting Jupyter to Pluto
+
+To convert a Jupyter notebook into a Pluto notebook, use the following Julia code snippet after installing Jupyter2Pluto:
+
+```julia
+using Jupyter2Pluto
+jupyter2pluto("sample.ipynb")
+```
+
+This command will create a new Pluto notebook named `sample.jl` in your current working directory.
+
+## Converting Pluto to Jupyter
+
+If you have a Pluto notebook and want to convert it to a Jupyter notebook, simply use the following Julia code:
+
+```julia
+pluto2jupyter("sample.jl")
+```
+This command will create a new Jupyter notebook named `sample.ipynb` in your current working directory.
+## Contributions
+ If you'd like to improve the package, fix issues, or add new features, please consider contributing to the project. 
